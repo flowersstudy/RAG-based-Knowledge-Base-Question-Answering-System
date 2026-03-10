@@ -1,6 +1,7 @@
 """
 RAG 核心引擎
 实现文档向量化存储和检索问答功能
+支持 Kimi (Moonshot) API
 """
 
 import os
@@ -13,6 +14,50 @@ from chromadb.config import Settings
 from openai import OpenAI
 
 from document_processor import DocumentChunk
+
+
+class LocalEmbedding:
+    """本地 Embedding 模型（用于文档向量化）"""
+
+    def __init__(self):
+        self.model = None
+        self._load_model()
+
+    def _load_model(self):
+        """加载本地模型"""
+        try:
+            from sentence_transformers import SentenceTransformer
+            print("正在加载本地 embedding 模型...")
+            # 使用轻量级中文友好的模型
+            self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            print("Embedding 模型加载完成")
+        except ImportError:
+            print("警告: 未安装 sentence-transformers，使用简单备选方案")
+            self.model = None
+
+    def encode(self, texts: List[str]) -> List[List[float]]:
+        """编码文本为向量"""
+        if self.model is None:
+            # 备选方案：使用简单的 hash 向量化（仅用于测试）
+            return self._fallback_encode(texts)
+
+        embeddings = self.model.encode(texts, convert_to_list=True)
+        return embeddings
+
+    def _fallback_encode(self, texts: List[str]) -> List[List[float]]:
+        """备选向量化方案（简单哈希）"""
+        import random
+        embeddings = []
+        for text in texts:
+            # 使用文本哈希生成固定维度的向量
+            random.seed(hash(text) % 10000)
+            vec = [random.uniform(-1, 1) for _ in range(384)]
+            # 归一化
+            import math
+            norm = math.sqrt(sum(x*x for x in vec))
+            vec = [x/norm for x in vec]
+            embeddings.append(vec)
+        return embeddings
 
 
 @dataclass
@@ -32,14 +77,21 @@ class Answer:
 
 
 class RAGEngine:
-    """RAG 引擎"""
+    """RAG 引擎 - 支持 Kimi API"""
 
     def __init__(self, api_key: str, base_url: Optional[str] = None):
         self.api_key = api_key
-        self.base_url = base_url or "https://api.openai.com/v1"
+        # 默认使用 Kimi API
+        self.base_url = base_url or "https://api.moonshot.cn/v1"
 
-        # 初始化 OpenAI 客户端
+        # 获取模型配置
+        self.llm_model = os.getenv("LLM_MODEL", "moonshot-v1-8k")
+
+        # 初始化 OpenAI 客户端（Kimi 兼容 OpenAI 格式）
         self.client = OpenAI(api_key=api_key, base_url=self.base_url)
+
+        # 初始化本地 Embedding 模型（Kimi 不提供 embedding）
+        self.embedding_model = LocalEmbedding()
 
         # 初始化 ChromaDB
         db_path = os.path.join(os.path.dirname(__file__), "chroma_db")
@@ -57,12 +109,9 @@ class RAGEngine:
         )
 
     def _get_embedding(self, text: str) -> List[float]:
-        """获取文本的 embedding"""
-        response = self.client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text[:8000]  # 限制输入长度
-        )
-        return response.data[0].embedding
+        """获取文本的 embedding（使用本地模型）"""
+        embeddings = self.embedding_model.encode([text[:8000]])
+        return embeddings[0]
 
     def add_documents(self, chunks: List[DocumentChunk]) -> int:
         """添加文档到知识库"""
@@ -183,7 +232,7 @@ class RAGEngine:
             # 流式输出
             def response_generator():
                 response = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model=self.llm_model,
                     messages=messages,
                     stream=True,
                     temperature=0.7
@@ -197,7 +246,7 @@ class RAGEngine:
         else:
             # 非流式输出
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=self.llm_model,
                 messages=messages,
                 temperature=0.7
             )

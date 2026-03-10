@@ -6,7 +6,7 @@
 
 - 📄 **多格式文档支持**：PDF、Word、TXT、Markdown
 - 🔍 **智能检索**：基于向量相似度的语义检索
-- 🤖 **大模型问答**：集成 OpenAI API 进行智能回答
+- 🤖 **大模型问答**：支持 Kimi (Moonshot) / OpenAI API
 - 🗄️ **向量数据库**：使用 ChromaDB 存储文档向量
 - 🌐 **Web 界面**：简洁美观的交互界面
 - ⚡ **流式输出**：实时显示回答内容
@@ -15,8 +15,8 @@
 
 - **后端**：Python + FastAPI
 - **向量数据库**：ChromaDB
-- **Embedding**：OpenAI text-embedding-3-small
-- **LLM**：OpenAI GPT-4 / GPT-3.5-turbo
+- **Embedding**：本地 sentence-transformers 模型（支持中文）
+- **LLM**：Kimi (Moonshot) / OpenAI API
 - **前端**：HTML + JavaScript + Tailwind CSS
 - **文档处理**：PyPDF2、python-docx
 
@@ -30,11 +30,23 @@ pip install -r requirements.txt
 
 ### 2. 配置环境变量
 
-创建 `.env` 文件：
+创建 `.env` 文件（参考 `.env.example`）：
 
+**使用 Kimi (推荐)：**
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=sk-your-kimi-api-key
+OPENAI_BASE_URL=https://api.moonshot.cn/v1
+LLM_MODEL=moonshot-v1-8k
 ```
+
+**使用 OpenAI：**
+```env
+OPENAI_API_KEY=sk-your-openai-api-key
+OPENAI_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-3.5-turbo
+```
+
+> 注意：Kimi 不提供 embedding API，系统会自动使用本地 embedding 模型处理文档。
 
 ### 3. 启动服务
 
