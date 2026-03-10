@@ -17,46 +17,60 @@ from document_processor import DocumentChunk
 
 
 class LocalEmbedding:
-    """本地 Embedding 模型（用于文档向量化）"""
+    """本地 Embedding 模型（基于文本特征，无需下载）"""
 
     def __init__(self):
-        self.model = None
-        self._load_model()
-
-    def _load_model(self):
-        """加载本地模型"""
-        try:
-            from sentence_transformers import SentenceTransformer
-            print("正在加载本地 embedding 模型...")
-            # 使用轻量级中文友好的模型
-            self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-            print("Embedding 模型加载完成")
-        except ImportError:
-            print("警告: 未安装 sentence-transformers，使用简单备选方案")
-            self.model = None
+        print("使用文本特征向量化方案（无需下载模型）")
 
     def encode(self, texts: List[str]) -> List[List[float]]:
         """编码文本为向量"""
-        if self.model is None:
-            # 备选方案：使用简单的 hash 向量化（仅用于测试）
-            return self._fallback_encode(texts)
+        return self._text_feature_encode(texts)
 
-        embeddings = self.model.encode(texts, convert_to_list=True)
-        return embeddings
+    def _text_feature_encode(self, texts: List[str]) -> List[List[float]]:
+        """基于文本特征的向量化"""
+        import math
+        from collections import Counter
 
-    def _fallback_encode(self, texts: List[str]) -> List[List[float]]:
-        """备选向量化方案（简单哈希）"""
-        import random
         embeddings = []
+        common_chars = ['的', '是', '在', '有', '和', '了', '不', '人', '我', '一',
+                       'a', 'e', 'i', 'o', 'n', 'r', 't', 's', 'l', 'c']
+
         for text in texts:
-            # 使用文本哈希生成固定维度的向量
-            random.seed(hash(text) % 10000)
-            vec = [random.uniform(-1, 1) for _ in range(384)]
+            features = []
+            text_len = max(len(text), 1)
+
+            # 1. 基础统计特征
+            features.append(len(text) / 1000.0)
+            features.append(len(set(text)) / text_len)
+
+            # 2. 字符类型比例
+            chinese = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+            english = sum(1 for c in text if c.isalpha() and c.isascii())
+            digits = sum(1 for c in text if c.isdigit())
+            spaces = sum(1 for c in text if c.isspace())
+            features.extend([chinese/text_len, english/text_len, digits/text_len, spaces/text_len])
+
+            # 3. 常见字符频率
+            char_freq = Counter(text.lower())
+            for char in common_chars:
+                features.append(char_freq.get(char, 0) / text_len)
+
+            # 4. 哈希特征（增加区分度）
+            h = hash(text)
+            for i in range(50):
+                features.append(((h >> (i % 32)) & 0xFF) / 255.0)
+
+            # 填充到384维
+            while len(features) < 384:
+                features.append(0.0)
+            features = features[:384]
+
             # 归一化
-            import math
-            norm = math.sqrt(sum(x*x for x in vec))
-            vec = [x/norm for x in vec]
-            embeddings.append(vec)
+            norm = math.sqrt(sum(x*x for x in features))
+            if norm > 0:
+                features = [x/norm for x in features]
+            embeddings.append(features)
+
         return embeddings
 
 
