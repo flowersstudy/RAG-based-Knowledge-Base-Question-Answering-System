@@ -11,13 +11,48 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
 
 from document_processor import process_uploaded_file
 from rag_engine import RAGEngine
 
-# 加载环境变量
-load_dotenv()
+
+def load_env_file(filepath: str = ".env"):
+    """加载 .env 文件，兼容 UTF-8 BOM 格式"""
+    if not os.path.exists(filepath):
+        return
+
+    # 尝试多种编码读取
+    encodings = ['utf-8-sig', 'utf-8', 'gbk', 'latin-1']
+
+    for encoding in encodings:
+        try:
+            with open(filepath, 'r', encoding=encoding) as f:
+                for line in f:
+                    line = line.strip()
+                    # 跳过空行和注释
+                    if not line or line.startswith('#'):
+                        continue
+                    # 解析 KEY=VALUE
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+                        # 移除可能的引号
+                        if value.startswith('"') and value.endswith('"'):
+                            value = value[1:-1]
+                        elif value.startswith("'") and value.endswith("'"):
+                            value = value[1:-1]
+                        os.environ[key] = value
+            print(f"已加载环境变量: {filepath} (编码: {encoding})")
+            return
+        except UnicodeDecodeError:
+            continue
+
+    print(f"警告: 无法读取 {filepath} 文件")
+
+
+# 加载环境变量（兼容 Windows UTF-8 BOM）
+load_env_file()
 
 # 全局引擎实例
 rag_engine: Optional[RAGEngine] = None
