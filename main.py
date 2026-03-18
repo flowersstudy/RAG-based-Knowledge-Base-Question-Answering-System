@@ -135,6 +135,23 @@ async def get_documents():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.delete("/api/documents/{filename:path}")
+async def delete_document(filename: str):
+    """删除指定文档"""
+    if not rag_engine:
+        raise HTTPException(status_code=503, detail="RAG 引擎未初始化")
+
+    try:
+        deleted_count = rag_engine.delete_document(filename)
+        return {
+            "success": True,
+            "message": f"已删除文档 '{filename}'",
+            "deleted_chunks": deleted_count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """上传文档到知识库"""

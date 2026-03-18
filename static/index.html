@@ -229,12 +229,19 @@
                 }
 
                 listDiv.innerHTML = data.documents.map(doc => `
-                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                        <div class="flex items-center min-w-0">
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors">
+                        <div class="flex items-center min-w-0 flex-1">
                             <i class="fas fa-file text-purple-400 mr-2"></i>
                             <span class="text-sm text-gray-700 truncate" title="${doc.filename}">${doc.filename}</span>
                         </div>
-                        <span class="text-xs text-gray-400 ml-2 flex-shrink-0">${doc.chunks} 片段</span>
+                        <div class="flex items-center ml-2">
+                            <span class="text-xs text-gray-400 mr-2">${doc.chunks} 片段</span>
+                            <button onclick="deleteDocument('${doc.filename}')"
+                                    class="text-gray-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                                    title="删除文档">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             } catch (e) {
@@ -541,6 +548,27 @@
         function scrollToBottom() {
             const container = document.getElementById('chatContainer');
             container.scrollTop = container.scrollHeight;
+        }
+
+        // 删除单个文档
+        async function deleteDocument(filename) {
+            if (!confirm(`确定要删除文档 "${filename}" 吗？`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/documents/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    loadStats();
+                    loadDocuments();
+                } else {
+                    alert('删除失败: ' + data.message);
+                }
+            } catch (e) {
+                alert('删除失败: ' + e.message);
+            }
         }
 
         // 清空知识库

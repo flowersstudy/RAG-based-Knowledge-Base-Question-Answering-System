@@ -341,6 +341,28 @@ class RAGEngine:
             print(f"获取文档列表失败: {e}")
             return []
 
+    def delete_document(self, filename: str) -> int:
+        """删除指定文档的所有片段，返回删除的片段数量"""
+        try:
+            # 获取所有文档
+            result = self.collection.get()
+
+            # 找到要删除的文档ID
+            ids_to_delete = []
+            for i, metadata in enumerate(result.get('metadatas', [])):
+                if metadata.get('source') == filename:
+                    ids_to_delete.append(result['ids'][i])
+
+            # 删除这些文档
+            if ids_to_delete:
+                self.collection.delete(ids=ids_to_delete)
+                return len(ids_to_delete)
+            return 0
+
+        except Exception as e:
+            print(f"删除文档失败: {e}")
+            raise e
+
     def clear_all(self):
         """清空知识库"""
         self.chroma_client.delete_collection("knowledge_base")
