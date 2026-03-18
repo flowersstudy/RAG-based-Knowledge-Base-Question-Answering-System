@@ -93,6 +93,43 @@ python main.py
 
 > ⚠️ 注意：Render 免费版会在 15 分钟无访问后休眠，首次访问可能需要等待 30 秒启动。
 
+---
+
+### 方式三：Hugging Face Spaces（免费，无需信用卡）
+
+**优点：** 完全免费，无需信用卡，网址固定
+
+**1. 注册 Hugging Face 账号**
+- 访问 https://huggingface.co/join
+- 用邮箱注册（国内可用）
+
+**2. 创建 Space**
+- 登录后点击右上角 → "New Space"
+- Space name: `rag-knowledge-base`（或你喜欢的名字）
+- License: 选 `Apache 2.0`
+- Space hardware: 选 `CPU free`
+- 点击 "Create Space"
+
+**3. 上传代码**
+在 Space 页面点击 "Files" → "Upload files"，上传以下文件：
+- `app.py`
+- `rag_engine.py`
+- `document_processor.py`
+- `requirements.txt`
+
+**4. 设置环境变量**
+点击 "Settings" → "Variables and Secrets"，添加：
+- `OPENAI_API_KEY` = 你的 API 密钥
+- `OPENAI_BASE_URL` = https://dashscope.aliyuncs.com/compatible-mode/v1
+- `LLM_MODEL` = qwen-turbo
+
+**5. 等待部署**
+约 2-3 分钟后，点击 "App" 标签即可使用！
+
+网址格式：`https://用户名-rag-knowledge-base.hf.space`
+
+---
+
 ## 项目结构
 
 ```
