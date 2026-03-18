@@ -76,13 +76,7 @@ python main.py
 
 ## 截图
 
-![系统界面](screenshot.png)
-
-> **如何添加自己的截图：**
-> 1. 启动服务后访问 http://localhost:8000
-> 2. 按 `Win + Shift + S` 截图
-> 3. 将图片保存为 `screenshot.png` 放在项目根目录
-> 4. 或者上传到 GitHub Issues 获取图片链接替换上面的 URL
+![本地图片](./images/UI%20Example%20.jpeg)
 
 ## 界面预览
 
