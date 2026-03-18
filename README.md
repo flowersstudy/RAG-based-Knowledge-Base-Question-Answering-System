@@ -74,11 +74,10 @@ python main.py
 
 启动服务后访问：http://localhost:8000/docs
 
-## 截图
+## 界面预览
 
 ![本地图片](./images/UI%20Example%20.jpeg)
 
-## 界面预览
 
 ### 主要功能区域
 - **左侧**：文档上传区 + 已上传文档列表 + 删除按钮
