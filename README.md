@@ -2,6 +2,17 @@
 
 基于 RAG (Retrieval-Augmented Generation) 的知识库问答系统，支持多种文档格式的上传、智能检索和问答。
 
+## 🚀 在线体验
+
+**Render 部署版（无需安装，直接用）：**
+> https://rag-knowledge-base.onrender.com
+
+> ⚠️ 注意：Render 免费版会在 15 分钟无访问后休眠，首次访问可能需要等待 30 秒启动。
+
+**自己部署：** 点击下方按钮一键部署到你的 Render 账号
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System)
+
 ## 功能特性
 
 - 📄 **多格式文档支持**：PDF、Word、TXT、Markdown
@@ -22,7 +33,26 @@
 
 ## 快速开始
 
-### 方式一：Docker 一键运行（推荐）
+### 方式一：部署到 Render（推荐，免费在线访问）
+
+**1. 点击部署按钮**
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System)
+
+**2. 配置环境变量**
+
+在 Render 控制台设置以下环境变量：
+- `OPENAI_API_KEY`：你的 API 密钥（必填）
+- `OPENAI_BASE_URL`：API 基础地址（如 `https://api.moonshot.cn/v1`）
+- `LLM_MODEL`：模型名称（如 `moonshot-v1-8k`）
+
+**3. 等待部署完成**
+
+大约 2-3 分钟后，Render 会给你一个访问链接，直接打开就能用！
+
+---
+
+### 方式二：Docker 一键运行（本地使用）
 
 **1. 克隆项目并进入目录**
 ```bash
