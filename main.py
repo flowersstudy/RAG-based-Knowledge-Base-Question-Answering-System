@@ -122,6 +122,19 @@ async def get_stats():
     return StatsResponse(**stats)
 
 
+@app.get("/api/documents")
+async def get_documents():
+    """获取已上传的文档列表"""
+    if not rag_engine:
+        raise HTTPException(status_code=503, detail="RAG 引擎未初始化")
+
+    try:
+        documents = rag_engine.get_documents()
+        return {"documents": documents}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """上传文档到知识库"""
@@ -191,7 +204,10 @@ async def query(request: QueryRequest):
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        error_detail = f"{str(e)}\n{traceback.format_exc()}"
+        print(f"错误详情: {error_detail}")
+        raise HTTPException(status_code=500, detail=f"{str(e)}\n请检查网络连接和API配置")
 
 
 @app.post("/api/query/stream")

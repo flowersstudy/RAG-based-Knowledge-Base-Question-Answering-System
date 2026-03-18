@@ -101,8 +101,31 @@ class RAGEngine:
         # 获取模型配置
         self.llm_model = os.getenv("LLM_MODEL", "moonshot-v1-8k")
 
-        # 初始化 OpenAI 客户端（Kimi 兼容 OpenAI 格式）
-        self.client = OpenAI(api_key=api_key, base_url=self.base_url)
+        # 初始化 OpenAI 客户端（阿里云/通义千问）
+        import httpx
+        import ssl
+
+        # 创建自定义 SSL 上下文（解决某些证书问题）
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        # 设置超时
+        timeout = httpx.Timeout(60.0, connect=10.0)
+
+        # 创建 http 客户端，禁用 SSL 验证
+        http_client = httpx.Client(
+            timeout=timeout,
+            verify=False,
+            http2=False
+        )
+
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=self.base_url,
+            timeout=timeout,
+            http_client=http_client
+        )
 
         # 初始化本地 Embedding 模型（Kimi 不提供 embedding）
         self.embedding_model = LocalEmbedding()
@@ -280,6 +303,43 @@ class RAGEngine:
         return {
             "total_documents": count
         }
+
+    def get_documents(self) -> List[Dict]:
+        """获取所有文档列表"""
+        try:
+            # 获取所有文档
+            result = self.collection.get()
+
+            # 按来源分组统计
+            source_stats = {}
+            for i, doc in enumerate(result.get('documents', [])):
+                metadata = result.get('metadatas', [{}])[i]
+                source = metadata.get('source', 'Unknown')
+
+                if source not in source_stats:
+                    source_stats[source] = {
+                        'chunks': 0,
+                        'total_length': 0
+                    }
+                source_stats[source]['chunks'] += 1
+                source_stats[source]['total_length'] += len(doc)
+
+            # 转换为列表
+            documents = []
+            for source, stats in source_stats.items():
+                documents.append({
+                    'filename': source,
+                    'chunks': stats['chunks'],
+                    'total_length': stats['total_length']
+                })
+
+            # 按文件名排序
+            documents.sort(key=lambda x: x['filename'])
+            return documents
+
+        except Exception as e:
+            print(f"获取文档列表失败: {e}")
+            return []
 
     def clear_all(self):
         """清空知识库"""

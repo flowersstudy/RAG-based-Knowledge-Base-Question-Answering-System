@@ -49,7 +49,22 @@ class DocumentProcessor:
         return chunks
 
     def _read_pdf(self, file_path: str) -> str:
-        """读取 PDF 文件"""
+        """读取 PDF 文件（优先使用 pdfplumber，备选 PyPDF2）"""
+        # 尝试使用 pdfplumber（对中文PDF支持更好）
+        try:
+            import pdfplumber
+            text_parts = []
+            with pdfplumber.open(file_path) as pdf:
+                for page_num, page in enumerate(pdf.pages):
+                    text = page.extract_text()
+                    if text and text.strip():
+                        text_parts.append(f"[第{page_num + 1}页]\n{text}")
+            if text_parts:
+                return '\n\n'.join(text_parts)
+        except Exception:
+            pass  # 失败则尝试 PyPDF2
+
+        # 备选：使用 PyPDF2
         try:
             import PyPDF2
             text_parts = []
@@ -57,7 +72,7 @@ class DocumentProcessor:
                 reader = PyPDF2.PdfReader(f)
                 for page_num, page in enumerate(reader.pages):
                     text = page.extract_text()
-                    if text:
+                    if text and text.strip():
                         text_parts.append(f"[第{page_num + 1}页]\n{text}")
             return '\n\n'.join(text_parts)
         except Exception as e:

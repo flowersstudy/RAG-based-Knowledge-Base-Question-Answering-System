@@ -126,6 +126,16 @@
                     <div id="uploadResult" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
                 </div>
 
+                <!-- 已上传文档 -->
+                <div class="glass rounded-2xl p-6 shadow-xl mb-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-file-alt mr-2 text-purple-600"></i>已上传文档
+                    </h2>
+                    <div id="documentList" class="space-y-2 max-h-48 overflow-y-auto">
+                        <p class="text-sm text-gray-400">暂无文档</p>
+                    </div>
+                </div>
+
                 <!-- 知识库管理 -->
                 <div class="glass rounded-2xl p-6 shadow-xl">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">
@@ -206,6 +216,34 @@
             }
         }
 
+        // 加载文档列表
+        async function loadDocuments() {
+            try {
+                const res = await fetch(`${API_BASE}/api/documents`);
+                const data = await res.json();
+                const listDiv = document.getElementById('documentList');
+
+                if (!data.documents || data.documents.length === 0) {
+                    listDiv.innerHTML = '<p class="text-sm text-gray-400">暂无文档</p>';
+                    return;
+                }
+
+                listDiv.innerHTML = data.documents.map(doc => `
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                        <div class="flex items-center min-w-0">
+                            <i class="fas fa-file text-purple-400 mr-2"></i>
+                            <span class="text-sm text-gray-700 truncate" title="${doc.filename}">${doc.filename}</span>
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2 flex-shrink-0">${doc.chunks} 片段</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('获取文档列表失败:', e);
+                document.getElementById('documentList').innerHTML =
+                    '<p class="text-sm text-red-400">加载失败</p>';
+            }
+        }
+
         // 文件上传
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -277,6 +315,7 @@
                         resultDiv.className = 'mt-3 p-3 rounded-lg text-sm bg-green-50 text-green-700 border border-green-200';
                         resultDiv.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${data.message}（已处理 ${data.chunks_added} 个片段）`;
                         loadStats();
+                        loadDocuments();
                     } else {
                         resultDiv.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200';
                         resultDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> 上传失败`;
@@ -314,23 +353,40 @@
                     await sendNormalQuestion(question);
                 }
             } catch (e) {
-                addBotMessage('抱歉，请求失败: ' + e.message);
+                console.error('Full error:', e);
+                let errorMsg = '抱歉，请求失败';
+                if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+                    errorMsg = '抱歉，网络连接失败。请检查：\n1. 后端服务是否正常运行\n2. 防火墙是否关闭\n3. 刷新页面重试';
+                } else {
+                    errorMsg = '抱歉，请求失败: ' + e.message;
+                }
+                addBotMessage(errorMsg);
             } finally {
                 sendBtn.disabled = false;
             }
         }
 
         async function sendNormalQuestion(question) {
-            const res = await fetch(`${API_BASE}/api/query`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question, top_k: 5 })
-            });
+            try {
+                const res = await fetch(`${API_BASE}/api/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, top_k: 5 })
+                });
 
-            const data = await res.json();
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(`HTTP ${res.status}: ${errorData.detail || 'Unknown error'}`);
+                }
 
-            // 添加回答和来源
-            addBotMessage(data.answer, data.sources);
+                const data = await res.json();
+
+                // 添加回答和来源
+                addBotMessage(data.answer, data.sources);
+            } catch (e) {
+                console.error('Request failed:', e);
+                throw e;
+            }
         }
 
         async function sendStreamQuestion(question) {
@@ -498,6 +554,7 @@
                 if (data.success) {
                     alert('知识库已清空');
                     loadStats();
+                    loadDocuments();
                 }
             } catch (e) {
                 alert('清空失败: ' + e.message);
@@ -506,6 +563,7 @@
 
         // 初始化
         loadStats();
+        loadDocuments();
     </script>
 </body>
 </html>
