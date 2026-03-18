@@ -22,7 +22,52 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 方式一：Docker 一键运行（推荐）
+
+**1. 克隆项目并进入目录**
+```bash
+git clone https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System.git
+cd RAG-based-Knowledge-Base-Question-Answering-System
+```
+
+**2. 配置 API 密钥**
+```bash
+# 复制配置文件
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的 API 密钥
+# Windows: notepad .env
+# Mac/Linux: nano .env
+```
+
+**3. 启动服务**
+```bash
+docker-compose up -d
+```
+
+**4. 访问系统**
+打开浏览器访问 http://localhost:8000
+
+**常用命令**
+```bash
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+
+# 重启服务
+docker-compose restart
+
+# 更新镜像（代码有更新时）
+docker-compose up -d --build
+```
+
+---
+
+### 方式二：本地运行
+
+**1. 安装依赖**
 
 ```bash
 pip install -r requirements.txt
@@ -74,11 +119,9 @@ python main.py
 
 启动服务后访问：http://localhost:8000/docs
 
-## 截图
+## 界面预览
 
 ![本地图片](./images/UI%20Example%20.jpeg)
-
-## 界面预览
 
 ### 主要功能区域
 - **左侧**：文档上传区 + 已上传文档列表 + 删除按钮

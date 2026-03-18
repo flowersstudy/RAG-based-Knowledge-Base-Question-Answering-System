@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  rag-app:
+    build: .
+    container_name: rag-knowledge-base
+    ports:
+      - "8000:8000"
+    environment:
+      # API配置（必填）- 修改为你的API密钥
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-your-api-key-here}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.moonshot.cn/v1}
+      - LLM_MODEL=${LLM_MODEL:-moonshot-v1-8k}
+      # 网络配置
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      # 持久化向量数据库
+      - ./chroma_db:/app/chroma_db
+      # 可选：挂载.env文件方便修改配置
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

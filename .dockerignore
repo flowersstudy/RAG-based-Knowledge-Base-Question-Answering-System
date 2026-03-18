@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# 测试文件
+test.pdf
+test_content.pdf
+test.docx
+test_doc.txt
+
+# 文档和图片（可选，如果你想包含就删除）
+# images/
+# *.png
+# *.jpeg
+
+# Docker 文件本身
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 其他
+.DS_Store
+*.md
