@@ -33,7 +33,7 @@
 
 ## 快速开始
 
-### 方式一：Docker 一键运行（本地部署）
+### 方式一：本地直接运行（Python + pip）
 
 **1. 克隆项目并进入目录**
 ```bash
@@ -41,42 +41,40 @@ git clone https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answ
 cd RAG-based-Knowledge-Base-Question-Answering-System
 ```
 
-**2. 配置 API 密钥**
+**2. 安装依赖**
 ```bash
-# 复制配置文件
-cp .env.example .env
-
-# 编辑 .env 文件，填入你的 API 密钥
-# Windows: notepad .env
-# Mac/Linux: nano .env
+pip install -r requirements.txt
 ```
 
-**3. 启动服务**
-```bash
-docker-compose up -d
+**3. 配置 API 密钥**
+
+创建 `.env` 文件（参考 `.env.example`）：
+
+**使用 Kimi (推荐)：**
+```env
+OPENAI_API_KEY=sk-your-kimi-api-key
+OPENAI_BASE_URL=https://api.moonshot.cn/v1
+LLM_MODEL=moonshot-v1-8k
 ```
 
-**4. 访问系统**
+**使用 阿里云通义千问：**
+```env
+OPENAI_API_KEY=sk-your-aliyun-api-key
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-turbo
+```
+
+**4. 启动服务**
+```bash
+python main.py
+```
+
+**5. 访问系统**
 打开浏览器访问 http://localhost:8000
-
-**常用命令**
-```bash
-# 查看日志
-docker-compose logs -f
-
-# 停止服务
-docker-compose down
-
-# 重启服务
-docker-compose restart
-
-# 更新镜像（代码有更新时）
-docker-compose up -d --build
-```
 
 ---
 
-### 方式二：部署到 Render（推荐，免费在线访问）
+### 方式二：Render 云端部署（免费在线访问）
 
 **1. 点击部署按钮**
 
