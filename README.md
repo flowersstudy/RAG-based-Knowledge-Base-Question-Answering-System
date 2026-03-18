@@ -78,6 +78,18 @@ python main.py
 
 ![系统界面](screenshot.png)
 
+> **如何添加自己的截图：**
+> 1. 启动服务后访问 http://localhost:8000
+> 2. 按 `Win + Shift + S` 截图
+> 3. 将图片保存为 `screenshot.png` 放在项目根目录
+> 4. 或者上传到 GitHub Issues 获取图片链接替换上面的 URL
+
+## 界面预览
+
+### 主要功能区域
+- **左侧**：文档上传区 + 已上传文档列表 + 删除按钮
+- **右侧**：问答对话框 + 流式输出显示
+
 ## License
 
 MIT License
