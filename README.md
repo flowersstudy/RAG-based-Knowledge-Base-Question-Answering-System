@@ -33,26 +33,7 @@
 
 ## 快速开始
 
-### 方式一：部署到 Render（推荐，免费在线访问）
-
-**1. 点击部署按钮**
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System)
-
-**2. 配置环境变量**
-
-在 Render 控制台设置以下环境变量：
-- `OPENAI_API_KEY`：你的 API 密钥（必填）
-- `OPENAI_BASE_URL`：API 基础地址（如 `https://api.moonshot.cn/v1`）
-- `LLM_MODEL`：模型名称（如 `moonshot-v1-8k`）
-
-**3. 等待部署完成**
-
-大约 2-3 分钟后，Render 会给你一个访问链接，直接打开就能用！
-
----
-
-### 方式二：Docker 一键运行（本地使用）
+### 方式一：Docker 一键运行（本地部署）
 
 **1. 克隆项目并进入目录**
 ```bash
@@ -95,7 +76,52 @@ docker-compose up -d --build
 
 ---
 
-### 方式二：本地运行
+### 方式二：部署到 Render（推荐，免费在线访问）
+
+**1. 克隆项目并进入目录**
+```bash
+git clone https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System.git
+cd RAG-based-Knowledge-Base-Question-Answering-System
+```
+
+**2. 配置 API 密钥**
+```bash
+# 复制配置文件
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的 API 密钥
+# Windows: notepad .env
+# Mac/Linux: nano .env
+```
+
+**3. 启动服务**
+```bash
+docker-compose up -d
+```
+
+**4. 访问系统**
+打开浏览器访问 http://localhost:8000
+
+**常用命令**
+```bash
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+
+# 重启服务
+docker-compose restart
+
+# 更新镜像（代码有更新时）
+docker-compose up -d --build
+```
+
+---
+
+---
+
+### 方式三：本地运行（Python 直接运行）
 
 **1. 安装依赖**
 
@@ -103,7 +129,7 @@ docker-compose up -d --build
 pip install -r requirements.txt
 ```
 
-### 2. 配置环境变量
+**2. 配置环境变量**
 
 创建 `.env` 文件（参考 `.env.example`）：
 
