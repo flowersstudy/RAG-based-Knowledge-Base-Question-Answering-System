@@ -78,84 +78,22 @@ docker-compose up -d --build
 
 ### 方式二：部署到 Render（推荐，免费在线访问）
 
-**1. 克隆项目并进入目录**
-```bash
-git clone https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System.git
-cd RAG-based-Knowledge-Base-Question-Answering-System
-```
+**1. 点击部署按钮**
 
-**2. 配置 API 密钥**
-```bash
-# 复制配置文件
-cp .env.example .env
-
-# 编辑 .env 文件，填入你的 API 密钥
-# Windows: notepad .env
-# Mac/Linux: nano .env
-```
-
-**3. 启动服务**
-```bash
-docker-compose up -d
-```
-
-**4. 访问系统**
-打开浏览器访问 http://localhost:8000
-
-**常用命令**
-```bash
-# 查看日志
-docker-compose logs -f
-
-# 停止服务
-docker-compose down
-
-# 重启服务
-docker-compose restart
-
-# 更新镜像（代码有更新时）
-docker-compose up -d --build
-```
-
----
-
----
-
-### 方式三：本地运行（Python 直接运行）
-
-**1. 安装依赖**
-
-```bash
-pip install -r requirements.txt
-```
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/flowersstudy/RAG-based-Knowledge-Base-Question-Answering-System)
 
 **2. 配置环境变量**
 
-创建 `.env` 文件（参考 `.env.example`）：
+在 Render 控制台设置以下环境变量：
+- `OPENAI_API_KEY`：你的 API 密钥（必填）
+- `OPENAI_BASE_URL`：API 基础地址（如 `https://api.moonshot.cn/v1`）
+- `LLM_MODEL`：模型名称（如 `moonshot-v1-8k`）
 
-**使用 Kimi (推荐)：**
-```env
-OPENAI_API_KEY=sk-your-kimi-api-key
-OPENAI_BASE_URL=https://api.moonshot.cn/v1
-LLM_MODEL=moonshot-v1-8k
-```
+**3. 等待部署完成**
 
-**使用 OpenAI：**
-```env
-OPENAI_API_KEY=sk-your-openai-api-key
-OPENAI_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-3.5-turbo
-```
+大约 2-3 分钟后，Render 会给你一个访问链接，直接打开就能用！
 
-> 注意：Kimi 不提供 embedding API，系统会自动使用本地 embedding 模型处理文档。
-
-### 3. 启动服务
-
-```bash
-python main.py
-```
-
-访问 http://localhost:8000 即可使用。
+> ⚠️ 注意：Render 免费版会在 15 分钟无访问后休眠，首次访问可能需要等待 30 秒启动。
 
 ## 项目结构
 
